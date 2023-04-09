@@ -1,11 +1,11 @@
 <?php
 
-
-use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CarController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\PenggunaController;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\DashuserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RegisterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,31 +17,23 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+// Route Login -> LoginController
+Route::get('/', [LoginController::class, 'index'])->name('login')->middleware('guest');
+Route::post('/', [LoginController::class, 'authenticate']);
+Route::post('/logout', [LoginController::class, 'logout']);
+Route::post('/adduser', [LoginController::class, 'store']);
+// Route Login
 
-Route::get('/', function () {
-    return view('user.login');
-});
-// Route::get('/login', function () {
-//     return view('user.login');
-// });
-Route::get('/l', function () {
-    return view('welcome');
-});
-Route::get('/home', function () {
-    return view('mahasiswa.index');
-});
-Route::get('/pages', function () {
-    return view('pages.index');
-});
+// Route Register
+Route::get('/register', [RegisterController::class, 'index'])->middleware('guest');
+Route::post('/register', [RegisterController::class, 'store']);
+// Route Register
 
-Route::resource('pages', PenggunaController::class)->name('index', 'pages');
+// Route Dashboard
+// Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('auth');
+Route::resource('/dashboard', DashboardController::class)->middleware('auth');
+Route::resource('/motor', CarController::class)->middleware('auth');
+// Route::post('/addmotor', [CarController::class, 'store']);
+// Route Dashboard
 
-Route::get('/register', [RegisterController::class, 'index'])->name('register.index');
-Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
-
-
-// Route::resource('pengguna', PenggunaController::class)->name('show', 'pengguna');
-
-Route::resource('home', CarController::class)->name('show', 'index');
-
-Route::resource('login', UserController::class)->name('index', 'login');
+Route::get('/dashboarduser', [DashuserController::class, 'index']);

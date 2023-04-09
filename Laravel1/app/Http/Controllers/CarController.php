@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CarModel;
-use Illuminate\Database\Eloquent\Collection;
+use App\Models\Car;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
-
 
 class CarController extends Controller
 {
@@ -15,53 +14,50 @@ class CarController extends Controller
      */
     public function index()
     {
-        $data['cars'] = DB::table('car_models')->paginate(1);
-        return view('mahasiswa.index', $data);
+        $data['cars'] = DB::table('cars')->paginate(5);
+        return view('motor', $data);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create(CarModel $carModel)
+    public function create()
     {
         //
-
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'plat' => 'required|max:10',
+            'plat' => 'required|min:5|unique:cars',
             'nama_motor' => 'required',
-            'alamat' => 'required',
+            'alamat' => 'required|min:2',
             'image' => 'required|image|mimes:jpeg,jpg,png|max:2048'
         ]);
         if ($request->hasfile('image')) {
             $image = round(microtime(true) * 1000) . '-' . str_replace(' ', '-', $request->file('image')->getClientOriginalName());
             $request->file('image')->move(public_path('img'), $image);
         }
-
-        // dd($image);
-        $query = DB::table('car_models')->insert([
+        $query = Car::create([
             'plat' => $request->plat,
             'nama_motor' => $request->nama_motor,
             'alamat' => $request->alamat,
-            'gambar' => $image,
+            'image' => $image
         ]);
         if ($query) {
-            return redirect()->route('home.index');
+            return redirect('/motor');
         } else {
-            return redirect()->back();
+            return redirect('/motor');
         }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(CarModel $carModel)
+    public function show(Car $car)
     {
         //
     }
@@ -69,10 +65,10 @@ class CarController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Car $car, string $id)
     {
-        $data['car'] = DB::table('car_models')->where('id', $id)->first();
-        return view('mahasiswa.detail', $data);
+        $data['car'] = DB::table('cars')->where('id', $id)->first();
+        return view('updatemotor', $data);
     }
 
     /**
@@ -80,29 +76,28 @@ class CarController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $query = DB::table('car_models')->where('id', $id)->update([
+        $query = DB::table('cars')->where('id', $id)->update([
             'plat' => $request->plat,
             'nama_motor' => $request->nama_motor,
             'alamat' => $request->alamat
         ]);
-
         if ($query) {
-            return redirect()->route('home.index')->with('success', 'Data Berhasil di Update');
+            return redirect('/motor');
         } else {
-            return redirect()->route('home.index')->with('failed', 'Data gagal di Update');
+            return redirect('/motor');
         }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Car $car, string $id)
     {
-        $query = DB::table('car_models')->where('id', $id)->delete();
+        $query = DB::table('cars')->where('id', $id)->delete();
         if ($query) {
-            return redirect()->route('home.index')->with('success', 'Data Berhasil dihapus');
+            return redirect('/motor');
         } else {
-            return redirect()->route('home.index')->with('failed', 'Data Berhasil dihapus');
+            return redirect('/motor');
         }
     }
 }
